@@ -2,3 +2,5 @@
 .vscode/
 *.pyc
 log/
+wiki_set/
+.python-version

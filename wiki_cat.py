@@ -1,4 +1,4 @@
-#!-*- encoding=utf-8 -*-
+# encoding=utf-8
 from __future__ import unicode_literals
 from browser import Browser
 from spider_logging import SpiderLogging
@@ -9,7 +9,7 @@ from raven_db import get_session
 import sys
 
 reload(sys)
-sys.setdefaultencoding('utf-8')
+sys.setdefaultencoding('gbk')
 
 
 class CrawlTopic(object):
@@ -48,12 +48,25 @@ class CrawlTopic(object):
 
         return categories[2]
 
+    def update_wiki_category(self):
+        from dao import get_all_doc_by_type_size
+        wikis = get_all_doc_by_type_size(3, 100)
+        while len(wikis) > 0:
+            for wiki in wikis:
+                url = wiki[0]
+                cat = self.find_wiki_html(url)
+                self._logger.info('process wiki: ' + url)
+                if cat:
+                    self._logger.info('find category: ' + cat)
+            wikis = get_all_doc_by_type_size(3, 100)
+
     def parse_json(self, folder_name):
         import os
         import json
         from model import Document
         session = get_session()
         try:
+            count = 0
             for file in os.listdir(folder_name):
                 self._logger.info('process: ' + file)
                 with open(os.path.join(folder_name, file), 'r') as f:
@@ -61,16 +74,18 @@ class CrawlTopic(object):
                         try:
                             if line[0] == '{':
                                 d = json.loads(line)
-                                # print d['title']
+                                self._logger.info('process wiki: ' + d['url'])
                                 new_doc = Document(title=self.convert(d['title']),
-                                                   file_name=file,
+                                                   file_name=d['url'],
                                                    content=self.convert(
                                                        d['text']),
                                                    category='', type=3)
                                 session.add(new_doc)
+                                count += 1
                         except Exception as e:
                             self._logger.error(e)
                     session.commit()
+                    self._logger.info('process wiki total: ' + str(count))
         except Exception as e:
             self._logger.error(e)
             session.rollback()
@@ -80,11 +95,16 @@ class CrawlTopic(object):
 
     @staticmethod
     def convert(text):
-        return text.strip().replace("\n", " ").decode()
+        import opencc
+        text = opencc.convert(text, config='t2s.json')
+
+        return text.strip().replace("\n", " ").decode('gbk')
 
 
 if __name__ == '__main__':
     bot = CrawlTopic()
     # text = bot.find_wiki_html('https://zh.wikipedia.org/wiki?curid=118')
     # print text
-    bot.parse_json('/Users/duzhiqiang/Code/nlp/wiki_set/AB')
+    # bot.parse_json('/Users/duzhiqiang/Code/nlp/wiki_set/AA')
+    # bot.parse_json('/Users/duzhiqiang/Code/nlp/wiki_set/AB')
+    bot.update_wiki_category()

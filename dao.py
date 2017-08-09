@@ -26,6 +26,11 @@ def get_all_doc_by_type(doc_type):
     return session.query(Document.id, Document.content, Document.category).filter(Document.type == doc_type).all()
 
 
+def get_all_doc_by_type_size(doc_type, limit=100):
+    """获取所有文档"""
+    return session.query(Document.file_name).filter(Document.type == doc_type and Document.category == ' ').limit(limit).all()
+
+
 def add_doc_features(features, set_type):
     """保存文档特征数据"""
     if len(features) > 0:
@@ -53,4 +58,5 @@ def trunate_doc_feature(set_type):
 
 
 if __name__ == '__main__':
-    pass
+    wiki = get_all_doc_by_type_size(3, 10)
+    print wiki[0][0]
