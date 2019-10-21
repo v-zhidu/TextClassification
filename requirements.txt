@@ -58,7 +58,7 @@ matplotlib==2.0.2
 msrest==0.4.11
 msrestazure==0.4.11
 MySQL-python==1.2.5
-nltk==3.2.4
+nltk==3.4.5
 numpy==1.13.1
 oauthlib==2.0.2
 olefile==0.44
