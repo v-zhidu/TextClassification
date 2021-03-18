@@ -64,7 +64,7 @@ oauthlib==2.0.2
 olefile==0.44
 OpenCC==0.2
 pathlib2==2.3.0
-Pillow==4.2.1
+Pillow==8.1.1
 progressbar==2.3
 pycparser==2.18
 PyJWT==1.5.2
